@@ -16,7 +16,7 @@ class Token:
 
     def get_new_token_with_refresh(self):
         data = {
-            "grant_type": "authorization_code",
+            "grant_type": "refresh_token",
             "client_id": self.__client_id,
             "client_secret": self.__client_secret,
             "refresh_token": self.__refresh_token,
@@ -32,7 +32,7 @@ class Token:
         )
         data_response = json.loads(response.text)
         if response.status_code == HTTPStatus.BAD_REQUEST:
-            return "Erro de autorização"
+            return data_response
 
         newAppAccess = data_response["access_token"]
         newRefreshToken = data_response["refresh_token"]
@@ -59,12 +59,12 @@ class Token:
     def update_env(self, refresh_token: str, app_access: str):
         env = open("./mydatasales_back_end/.env", "w")
         lines = [
-            f"client_secret='{self.__client_secret}'",
-            f"client_id='{self.__client_id}'",
-            f"redirect_url='{self.__redirect_uri}'",
-            f"refresh_token='{refresh_token}'",
-            f"app_access='{app_access}'",
+            f"client_secret='{self.__client_secret}' \n",
+            f"client_id='{self.__client_id}'\n",
+            f"redirect_url='{self.__redirect_uri}' \n",
+            f"refresh_token='{refresh_token}'\n",
+            f"app_access='{app_access}'\n",
         ]
-        print('passei aqui')
+        print("passei aqui")
         env.writelines(lines)
         env.close()
