@@ -80,9 +80,9 @@ def get_item_controller(item_id, global_token):
 
     if response.status_code == HTTPStatus.BAD_REQUEST:
         return fix_no_authorized_request.json()
-
-    if response.json()['error'] == 'not_found':
-        return {"Mensagem": "Produto não encontrado"}
+    if 'error' in response.json() and response.json()['error']=='not_found' :
+        if response.json()['error'] == 'not_found':
+            return {"Mensagem": "Produto não encontrado"}
     
     return response.json()
 
@@ -103,8 +103,7 @@ def get_item_pictures_controller(item_id, global_token):
         return filter_pictures_item(
             fix_no_authorized_request(item_id, global_token)
         )
-    
-    if response.json()['error'] == 'not_found':
+    if 'error' in response.json() and response.json()['error']=='not_found' :
         return {"Mensagem": "Produto não encontrado"}
     
     return filter_pictures_item(response)
@@ -116,6 +115,6 @@ def get_item_prices_controller(item_id, global_token):
         None,
         global_token,
     )
-    if response.json()['status'] == 404:
+    if 'error' in response.json() and response.json()['status']==404 :
         return {"Mensagem": "Produto não encontrado"}
     return response.json()
