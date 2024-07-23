@@ -78,9 +78,12 @@ def get_item_controller(item_id, global_token):
         f"https://api.mercadolibre.com/items/{item_id}", None, global_token
     )
 
-    if (response.status_code == HTTPStatus.BAD_REQUEST):
+    if response.status_code == HTTPStatus.BAD_REQUEST:
         return fix_no_authorized_request.json()
 
+    if response.json()['error'] == 'not_found':
+        return {"Mensagem": "Produto não encontrado"}
+    
     return response.json()
 
 
@@ -89,15 +92,30 @@ def filter_pictures_item(response):
     urls = []
     for item in data_response["pictures"]:
         urls.append(item["url"])
-    return {"pictures":urls}
+    return {"pictures": urls}
 
-def get_item_pictures_controller(item_id, global_token): 
+
+def get_item_pictures_controller(item_id, global_token):
     response = get_make_request_autorized(
         f"https://api.mercadolibre.com/items/{item_id}", None, global_token
     )
-    if (response.status_code == HTTPStatus.BAD_REQUEST):
-        return filter_pictures_item(fix_no_authorized_request(item_id, global_token))
+    if response.status_code == HTTPStatus.BAD_REQUEST:
+        return filter_pictures_item(
+            fix_no_authorized_request(item_id, global_token)
+        )
+    
+    if response.json()['error'] == 'not_found':
+        return {"Mensagem": "Produto não encontrado"}
+    
     return filter_pictures_item(response)
 
+
 def get_item_prices_controller(item_id, global_token):
-    return get_make_request_autorized( f"https://api.mercadolibre.com/items/{item_id}/prices",None, global_token).json()
+    response = get_make_request_autorized(
+        f"https://api.mercadolibre.com/items/{item_id}/prices",
+        None,
+        global_token,
+    )
+    if response.json()['status'] == 404:
+        return {"Mensagem": "Produto não encontrado"}
+    return response.json()

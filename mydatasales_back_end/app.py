@@ -1,23 +1,35 @@
 import os
-from http import HTTPStatus
 
 import dotenv
-import requests
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from mydatasales_back_end.controllers.controllers import (
     get_item_controller,
+    get_item_pictures_controller,
+    get_item_prices_controller,
     home_controller,
     new_code_controller,
     new_token_w_code_controller,
-    get_item_pictures_controller,
-    get_item_prices_controller
 )
 from mydatasales_back_end.Modules.token import Token
 
 """ import pandas as pd """
 
 app = FastAPI()
+origins = [
+    'http://localhost:8000',
+    'http://localhost:3000',
+    '*'
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 client_id = os.getenv("client_id")
@@ -29,6 +41,9 @@ app_access = os.getenv("app_access")
 global_token = Token(
     app_access, refresh_token, client_id, client_secret, redirect_uri
 )
+
+global_token.get_new_token_with_refresh()
+
 
 
 @app.get("/")
@@ -61,7 +76,6 @@ async def getItemPictures(item_id):
 @app.get("/item/{item_id}/prices")
 async def getItemPrices(item_id):
     return get_item_prices_controller(item_id, global_token)
-    
 
 
 @app.get("/refresh-token")
